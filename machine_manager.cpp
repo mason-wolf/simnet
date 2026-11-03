@@ -246,6 +246,45 @@ void scaffold_sessions(const std::string &machine_name)
     }
 }
 
+void scaffold_processes(const std::string &machine_name) {
+    fs:create_directories(machine_name + "/C/Windows/System32");
+    std::ofstream file(machine_name + "/C/Windows/System32/tasklist.txt");
+    
+    if (file.is_open()){
+        file << "System Idle Process,0,Services,0,8 K\n";
+        file << "System,4,Services,0,136 K\n";
+        file << "Registry,112,Services,0,48,210 K\n";
+        file << "smss.exe,444,Services,0,1,048 K\n";
+        file << "csrss.exe,568,Services,0,5,212 K\n";
+        file << "wininit.exe,644,Services,0,2,104 K\n";
+        file << "csrss.exe,652,Console,1,6,152 K\n";
+        file << "services.exe,712,Services,0,12,416 K\n";
+        file << "lsass.exe,728,Services,0,18,924 K\n";
+        file << "svchost.exe,812,Services,0,21,412 K\n";
+        file << "winlogon.exe,832,Console,1,7,420 K\n";
+        file << "svchost.exe,912,Services,0,14,816 K\n";
+        file << "svchost.exe,1014,Services,0,8,912 K\n";
+        file << "fontdrvhost.exe,1056,Services,0,3,114 K\n";
+        file << "fontdrvhost.exe,1064,Console,1,4,118 K\n";
+        file << "Memory Compression,1108,Services,0,82,416 K\n";
+        file << "svchost.exe,1204,Services,0,19,214 K\n";
+        file << "spoolsv.exe,1340,Services,0,9,420 K\n";
+        file << "svchost.exe,1412,Services,0,11,204 K\n";
+        file << "SearchIndexer.exe,2148,Services,0,34,812 K\n";
+        file << "SecurityHealthService,2210,Services,0,10,214 K\n";
+        file << "userinit.exe,2468,Console,1,4,912 K\n";
+        file << "explorer.exe,2496,Console,1,98,124 K\n";
+        file << "smartscreen.exe,3104,Console,1,14,104 K\n";
+        file << "taskhostw.exe,3120,Console,1,12,408 K\n";
+        file << "OneDrive.exe,3892,Console,1,28,416 K\n";
+        file << "cmd.exe,4112,Console,1,5,116 K\n";
+        file << "tasklist.exe,4160,Console,1,7,824 K\n";
+        file.close();
+    }
+
+    }
+
+
 /**
  * Adds a machine.
  */
