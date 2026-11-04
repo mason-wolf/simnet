@@ -2,6 +2,7 @@
 #include "fs/fs_commands.h"
 #include "registry/reg_commands.h"
 #include "network/net_commands.h"
+#include "process/process_commands.h"
 #include <iostream>
 #include <string>
 #include <filesystem>
@@ -162,6 +163,18 @@ void SimAgent::login(const std::string &machine_name)
         if (input == "query user" || input == "quser")
         {
             handle_query_user(machine_name);
+            continue;
+        }
+
+        if (input == "tasklist")
+        {
+            handle_tasklist(machine_name);
+            continue;
+        }
+
+        if (input.substr(0, 8) == "taskkill" || input == "taskkill")
+        {
+            handle_taskkill(machine_name, input);
             continue;
         }
     }

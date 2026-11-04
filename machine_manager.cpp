@@ -247,7 +247,7 @@ void scaffold_sessions(const std::string &machine_name)
 }
 
 void scaffold_processes(const std::string &machine_name) {
-    fs:create_directories(machine_name + "/C/Windows/System32");
+    fs::create_directories(machine_name + "/C/Windows/System32");
     std::ofstream file(machine_name + "/C/Windows/System32/tasklist.txt");
     
     if (file.is_open()){
@@ -305,12 +305,59 @@ void handle_add_machine(const std::string &input)
             scaffold_users(machine_name);
             scaffold_arp(machine_name);
             scaffold_sessions(machine_name);
+            scaffold_processes(machine_name);
         }
         else
         {
             std::cout << "usage: add machine <machine_name>\n";
         }
     }
+}
+
+void handle_remove_machine(const std::string &input)
+{
+    std::string prefix = "remove machine ";
+    std::string alt_prefix = "delete machine ";
+
+    std::string command = input;
+    std::string target_prefix = "";
+
+    if (input.rfind(prefix, 0) == 0)
+    {
+        target_prefix = prefix;
+    }
+    else if (input.rfind(alt_prefix, 0) == 0)
+    {
+        target_prefix = alt_prefix;
+    }
+    else
+    {
+        return;
+    }
+
+    std::string machine_name = input.substr(target_prefix.size());
+    if (machine_name.empty())
+    {
+        std::cout << "usage: remote machine <machine_name>\n";
+        return;
+    }
+
+    if (!fs::exists(machine_name))
+    {
+        std::cout << "machine '" << machine_name << "' does not exist\n";
+        return;
+    }
+
+    std::error_code ec;
+    std::uintmax_t removed = fs::remove_all(machine_name, ec);
+
+    if (ec || removed == 0)
+    {
+        std::cout << "failed to remove machine '" << machine_name << "'\n";
+        return;
+    }
+
+    std::cout << "machine '" << machine_name << "' removed\n";
 }
 
 void handle_login(const std::string &input)
@@ -392,6 +439,7 @@ void MachineManager::run()
         }
 
         handle_add_machine(input);
+        handle_remove_machine(input);
         handle_login(input);
     }
 }
