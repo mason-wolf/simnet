@@ -8,6 +8,11 @@
 
 namespace fs = std::filesystem;
 
+static std::string machine_root(const std::string &machine_name)
+{
+    return "devices/" + machine_name;
+}
+
 static bool iequals(const std::string &a, const std::string &b)
 {
     if (a.size() != b.size())
@@ -49,17 +54,17 @@ void handle_reg_query(const std::string &machine_name, const std::string &query)
 
     if (iequals(path, "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"))
     {
-        reg_dir = machine_name + "/registry/HKLM/SOFTWARE/Microsoft/Windows/CurrentVersion/Run";
+        reg_dir = machine_root(machine_name) + "/registry/HKLM/SOFTWARE/Microsoft/Windows/CurrentVersion/Run";
         display_key = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run";
     }
     else if (iequals(path, "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnce"))
     {
-        reg_dir = machine_name + "/registry/HKLM/SOFTWARE/Microsoft/Windows/CurrentVersion/RunOnce";
+        reg_dir = machine_root(machine_name) + "/registry/HKLM/SOFTWARE/Microsoft/Windows/CurrentVersion/RunOnce";
         display_key = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnce";
     }
     else if (iequals(path, "HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Services"))
     {
-        reg_dir = machine_name + "/registry/HKLM/SYSTEM/CurrentControlSet/Services";
+        reg_dir = machine_root(machine_name) + "/registry/HKLM/SYSTEM/CurrentControlSet/Services";
         display_key = "HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Services";
     }
     else

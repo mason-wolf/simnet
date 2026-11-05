@@ -4,6 +4,7 @@
 #include "network/net_commands.h"
 #include "process/process_commands.h"
 #include "events/handle_get_security_events.h"
+#include "tasks/tasks_commands.h"
 #include <iostream>
 #include <string>
 #include <filesystem>
@@ -11,9 +12,14 @@
 
 namespace fs = std::filesystem;
 
+static std::string machine_root(const std::string &machine_name)
+{
+    return "devices/" + machine_name;
+}
+
 void SimAgent::login(const std::string &machine_name)
 {
-    if (!fs::exists(machine_name))
+    if (!fs::exists(machine_root(machine_name)))
     {
         std::cout << "Machine '" << machine_name << "' does not exist.\n";
         return;
@@ -89,7 +95,7 @@ void SimAgent::login(const std::string &machine_name)
 
         if (input == "systeminfo")
         {
-            std::ifstream file(machine_name + "/systeminfo.txt");
+            std::ifstream file(machine_root(machine_name) + "/systeminfo.txt");
             if (file.is_open())
             {
                 std::string line;
@@ -163,7 +169,6 @@ void SimAgent::login(const std::string &machine_name)
             continue;
         }
 
-        // Get-CimInstance -ClassName Win32_UserAccount -Filter "LocalAccount='True'"
         if (input == "Get-CimInstance -ClassName Win32_UserAccount -Filter \"LocalAccount='True'\"")
         {
             handle_get_cim_useraccount(machine_name);
@@ -174,6 +179,12 @@ void SimAgent::login(const std::string &machine_name)
         {
             handle_query_user(machine_name);
             log_command_security_event(machine_name, "quser.exe", input);
+            continue;
+        }
+
+        if (input == "schtasks")
+        {
+            handle_schtasks(machine_name);
             continue;
         }
 

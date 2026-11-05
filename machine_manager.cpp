@@ -3,8 +3,14 @@
 #include <filesystem>
 #include "sim_agent.h"
 #include <fstream>
+#include "tasks/tasks_commands.h"
 
 namespace fs = std::filesystem;
+
+static std::string machine_root(const std::string &machine_name)
+{
+    return "devices/" + machine_name;
+}
 
 /**
  * Handles exit command.
@@ -36,15 +42,16 @@ bool handle_clear(const std::string &input)
  */
 void scaffold_fs(const std::string &machine_name)
 {
-    fs::create_directories(machine_name + "/C/Windows/System32");
-    fs::create_directories(machine_name + "/C/Windows/System32/config");
-    fs::create_directories(machine_name + "/C/Program Files");
-    fs::create_directories(machine_name + "/C/Program Files (x86)");
-    fs::create_directories(machine_name + "/C/Users/Administrator/Desktop");
-    fs::create_directories(machine_name + "/C/Users/Administrator/Documents");
-    fs::create_directories(machine_name + "/C/Users/Public");
-    fs::create_directories(machine_name + "/C/PerfLogs");
-    fs::create_directories(machine_name + "/C/Windows/Temp");
+    const std::string root = machine_root(machine_name);
+    fs::create_directories(root + "/C/Windows/System32");
+    fs::create_directories(root + "/C/Windows/System32/config");
+    fs::create_directories(root + "/C/Program Files");
+    fs::create_directories(root + "/C/Program Files (x86)");
+    fs::create_directories(root + "/C/Users/Administrator/Desktop");
+    fs::create_directories(root + "/C/Users/Administrator/Documents");
+    fs::create_directories(root + "/C/Users/Public");
+    fs::create_directories(root + "/C/PerfLogs");
+    fs::create_directories(root + "/C/Windows/Temp");
     std::cout << "machine '" << machine_name << "' added\n";
 }
 
@@ -53,7 +60,8 @@ void scaffold_fs(const std::string &machine_name)
  */
 void scaffold_netconfig(const std::string &machine_name)
 {
-    std::ofstream ipconfig_file(machine_name + "/ipconfig.txt");
+    const std::string root = machine_root(machine_name);
+    std::ofstream ipconfig_file(root + "/ipconfig.txt");
     if (ipconfig_file.is_open())
     {
         ipconfig_file << "Windows IP Configuration\n\n";
@@ -71,7 +79,8 @@ void scaffold_netconfig(const std::string &machine_name)
  */
 void scaffold_mac(const std::string &machine_name)
 {
-    std::ofstream file(machine_name + "/mac.txt");
+    const std::string root = machine_root(machine_name);
+    std::ofstream file(root + "/mac.txt");
     if (file.is_open())
     {
         srand(static_cast<unsigned int>(time(nullptr)) + static_cast<unsigned int>(machine_name.size()));
@@ -94,9 +103,10 @@ void scaffold_mac(const std::string &machine_name)
  */
 void scaffold_registry(const std::string &machine_name)
 {
-    fs::create_directories(machine_name + "/registry/HKLM/SOFTWARE/Microsoft/Windows/CurrentVersion/Run");
-    fs::create_directories(machine_name + "/registry/HKLM/SOFTWARE/Microsoft/Windows/CurrentVersion/RunOnce");
-    std::ofstream run_value(machine_name + "/registry/HKLM/SOFTWARE/Microsoft/Windows/CurrentVersion/Run/SecurityHealth");
+    const std::string root = machine_root(machine_name);
+    fs::create_directories(root + "/registry/HKLM/SOFTWARE/Microsoft/Windows/CurrentVersion/Run");
+    fs::create_directories(root + "/registry/HKLM/SOFTWARE/Microsoft/Windows/CurrentVersion/RunOnce");
+    std::ofstream run_value(root + "/registry/HKLM/SOFTWARE/Microsoft/Windows/CurrentVersion/Run/SecurityHealth");
     if (run_value.is_open())
     {
         run_value << "REG_SZ\n";
@@ -104,7 +114,7 @@ void scaffold_registry(const std::string &machine_name)
         run_value.close();
     }
 
-    std::string services_base = machine_name + "/registry/HKLM/SYSTEM/CurrentControlSet/Services";
+    std::string services_base = root + "/registry/HKLM/SYSTEM/CurrentControlSet/Services";
 
     fs::create_directories(services_base + "/ACPI");
     fs::create_directories(services_base + "/AFD");
@@ -133,55 +143,49 @@ void scaffold_registry(const std::string &machine_name)
  */
 void scaffold_systeminfo(const std::string &machine_name)
 {
-    std::ofstream file(machine_name + "/systeminfo.txt");
+    const std::string root = machine_root(machine_name);
+    std::ofstream file(root + "/systeminfo.txt");
     if (file.is_open())
     {
         file << "Host Name:                 " << machine_name << "\n";
-        file << "OS Name:                   Microsoft Windows 10 Pro\n";
-        file << "OS Version:                10.0.19045 N/A Build 19045\n";
-        file << "OS Manufacturer:           Microsoft Corporation\n";
-        file << "OS Configuration:          Standalone Workstation\n";
-        file << "OS Build Type:             Multiprocessor Free\n";
-        file << "Registered Owner:          Administrator\n";
-        file << "Registered Organization:  \n";
-        file << "Product ID:                00330-80000-00000-AA123\n";
-        file << "Original Install Date:     3/15/2024, 9:22:11 AM\n";
-        file << "System Boot Time:          10/8/2026, 8:01:44 AM\n";
-        file << "System Manufacturer:       WinSim Virtual\n";
-        file << "System Model:              WinSim-PC\n";
-        file << "System Type:               x64-based PC\n";
-        file << "Processor(s):              1 Processor(s) Installed.\n";
-        file << "                           [01]: Intel64 Family 6 Model 158 Stepping 10 GenuineIntel ~3600 Mhz\n";
-        file << "BIOS Version:              WinSim BIOS 1.0, 1/1/2024\n";
-        file << "Windows Directory:         C:\\Windows\n";
-        file << "System Directory:          C:\\Windows\\System32\n";
-        file << "Boot Device:               \\Device\\HarddiskVolume1\n";
-        file << "System Locale:             en-us;English (United States)\n";
-        file << "Input Locale:              en-us;English (United States)\n";
-        file << "Time Zone:                 (UTC-05:00) Eastern Time (US & Canada)\n";
-        file << "Total Physical Memory:     8,192 MB\n";
+        file << "OS Name:                  Microsoft Windows 11 Pro\n";
+        file << "OS Version:               10.0.19045 N/A Build 19045\n";
+        file << "System Manufacturer:      WinSim Virtual\n";
+        file << "System Model:             WinSim-PC\n";
+        file << "System Type:              x64-based PC\n";
+        file << "Processor(s):             1 Processor(s) Installed.\n";
+        file << "                          [01]: Intel64 Family 6 Model 158 Stepping 10 GenuineIntel ~3600 Mhz\n";
+        file << "BIOS Version:             WinSim BIOS 1.0, 1/1/2024\n";
+        file << "Windows Directory:        C:\\Windows\n";
+        file << "System Directory:         C:\\Windows\\System32\n";
+        file << "Boot Device:              \\Device\\HarddiskVolume1\n";
+        file << "System Locale:            en-us;English (United States)\n";
+        file << "Input Locale:             en-us;English (United States)\n";
+        file << "Time Zone:                (UTC-05:00) Eastern Time (US & Canada)\n";
+        file << "Total Physical Memory:    8,192 MB\n";
         file << "Available Physical Memory: 5,124 MB\n";
-        file << "Virtual Memory: Max Size:  9,472 MB\n";
+        file << "Virtual Memory: Max Size: 9,472 MB\n";
         file << "Virtual Memory: Available: 6,201 MB\n";
-        file << "Virtual Memory: In Use:    3,271 MB\n";
-        file << "Page File Location(s):     C:\\pagefile.sys\n";
-        file << "Domain:                    WORKGROUP\n";
-        file << "Logon Server:              \\\\" << machine_name << "\n";
-        file << "Hotfix(s):              7 Hotfix(s) Installed.\n";
-        file << "Network Card(s):           1 NIC(s) Installed.\n";
-        file << "                           [01]: WinSim Virtual Ethernet Adapter\n";
-        file << "                                 Connection Name: Ethernet\n";
-        file << "                                 DHCP Enabled:    Yes\n";
-        file << "                                 DHCP Server:     192.168.10.1\n";
-        file << "                                 IP address(es)\n";
-        file << "                                 [01]: 192.168.10.10\n";
+        file << "Virtual Memory: In Use:   3,271 MB\n";
+        file << "Page File Location(s):    C:\\pagefile.sys\n";
+        file << "Domain:                   WORKGROUP\n";
+        file << "Logon Server:             \\" << machine_name << "\n";
+        file << "Hotfix(s):                7 Hotfix(s) Installed.\n";
+        file << "Network Card(s):          1 NIC(s) Installed.\n";
+        file << "                          [01]: WinSim Virtual Ethernet Adapter\n";
+        file << "                                Connection Name: Ethernet\n";
+        file << "                                DHCP Enabled:    Yes\n";
+        file << "                                DHCP Server:     192.168.10.1\n";
+        file << "                                IP address(es)\n";
+        file << "                                [01]: 192.168.10.10\n";
         file.close();
     }
 }
 
 void scaffold_ssh(const std::string &machine_name)
 {
-    std::ofstream file(machine_name + "/ssh");
+    const std::string root = machine_root(machine_name);
+    std::ofstream file(root + "/ssh");
     if (file.is_open())
     {
         file << "Administrator\n";
@@ -192,7 +196,8 @@ void scaffold_ssh(const std::string &machine_name)
 
 void scaffold_netstat(const std::string &machine_name)
 {
-    std::ofstream file(machine_name + "/netstat.txt");
+    const std::string root = machine_root(machine_name);
+    std::ofstream file(root + "/netstat.txt");
     if (file.is_open())
     {
         file << "TCP  0.0.0.0:135            0.0.0.0:0              LISTENING       912\n";
@@ -210,35 +215,33 @@ void scaffold_netstat(const std::string &machine_name)
 
 void scaffold_users(const std::string &machine_name)
 {
-    std::ofstream file(machine_name + "/users");
+    const std::string root = machine_root(machine_name);
+    std::ofstream file(root + "/users");
     if (file.is_open())
     {
         file << "Administrator\n";
-        file << "DefaultAccount\n";
         file << "Guest\n";
-        file << "WDAGUtilityAccount\n";
         file.close();
     }
 }
 
 void scaffold_arp(const std::string &machine_name)
 {
-    std::ofstream file(machine_name + "/arp.txt");
+    const std::string root = machine_root(machine_name);
+    std::ofstream file(root + "/arp.txt");
     if (file.is_open())
     {
-        file << "192.168.10.1          00-11-22-33-44-55     dynamic\n";
-        file << "192.168.10.255        ff-ff-ff-ff-ff-ff     static\n";
-        file << "224.0.0.22            01-00-5e-00-00-16     static\n";
-        file << "224.0.0.251           01-00-5e-00-00-fb     static\n";
-        file << "224.0.0.252           01-00-5e-00-00-fc     static\n";
-        file << "239.255.255.250       01-00-5e-7f-ff-fa     static\n";
+        file << "Interface: 192.168.10.10 --- 0x5\n";
+        file << "192.168.10.1     00-11-22-33-44-55     dynamic\n";
+        file << "192.168.10.5     66-77-88-99-aa-bb     dynamic\n";
         file.close();
     }
 }
 
 void scaffold_sessions(const std::string &machine_name)
 {
-    std::ofstream file(machine_name + "/sessions");
+    const std::string root = machine_root(machine_name);
+    std::ofstream file(root + "/sessions");
     if (file.is_open())
     {
         file << "Administrator console 1 Active none 10/8/2026 8:01 AM\n";
@@ -246,11 +249,13 @@ void scaffold_sessions(const std::string &machine_name)
     }
 }
 
-void scaffold_processes(const std::string &machine_name) {
-    fs::create_directories(machine_name + "/C/Windows/System32");
-    std::ofstream file(machine_name + "/C/Windows/System32/tasklist.txt");
-    
-    if (file.is_open()){
+void scaffold_processes(const std::string &machine_name)
+{
+    const std::string root = machine_root(machine_name);
+    fs::create_directories(root + "/C/Windows/System32");
+    std::ofstream file(root + "/C/Windows/System32/tasklist.txt");
+    if (file.is_open())
+    {
         file << "System Idle Process,0,Services,0,8 K\n";
         file << "System,4,Services,0,136 K\n";
         file << "Registry,112,Services,0,48,210 K\n";
@@ -281,16 +286,14 @@ void scaffold_processes(const std::string &machine_name) {
         file << "tasklist.exe,4160,Console,1,7,824 K\n";
         file.close();
     }
-
-    }
+}
 
 void scaffold_security_events(const std::string &machine_name)
 {
-    std::ofstream file(machine_name + "/security_events.txt");
+    const std::string root = machine_root(machine_name);
+    std::ofstream file(root + "/security_events.txt");
     if (!file.is_open())
-    {
         return;
-    }
 
     file << "TimeCreated       : 11/4/2026 2:18:45 PM\n";
     file << "ProviderName      : Microsoft-Windows-Security-Auditing\n";
@@ -355,6 +358,8 @@ void handle_add_machine(const std::string &input)
         if (input.length() > 12)
         {
             std::string machine_name = input.substr(12);
+            const std::string root = machine_root(machine_name);
+            fs::create_directories(root);
             scaffold_fs(machine_name);
             scaffold_netconfig(machine_name);
             scaffold_registry(machine_name);
@@ -367,6 +372,7 @@ void handle_add_machine(const std::string &input)
             scaffold_sessions(machine_name);
             scaffold_security_events(machine_name);
             scaffold_processes(machine_name);
+            scaffold_tasks(machine_name);
         }
         else
         {
@@ -403,14 +409,15 @@ void handle_remove_machine(const std::string &input)
         return;
     }
 
-    if (!fs::exists(machine_name))
+    const std::string root = machine_root(machine_name);
+    if (!fs::exists(root))
     {
         std::cout << "machine '" << machine_name << "' does not exist\n";
         return;
     }
 
     std::error_code ec;
-    std::uintmax_t removed = fs::remove_all(machine_name, ec);
+    std::uintmax_t removed = fs::remove_all(root, ec);
 
     if (ec || removed == 0)
     {
@@ -436,14 +443,15 @@ void handle_login(const std::string &input)
 
         std::string user = target.substr(0, at_pos);
         std::string machine_name = target.substr(at_pos + 1);
+        const std::string root = machine_root(machine_name);
 
-        if (!fs::exists(machine_name))
+        if (!fs::exists(root))
         {
             std::cout << "ssh: Could not resolve hostname " << machine_name << "\n";
             return;
         }
 
-        std::ifstream ssh_file(machine_name + "/ssh");
+        std::ifstream ssh_file(root + "/ssh");
 
         if (!ssh_file.is_open())
         {

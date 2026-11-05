@@ -10,6 +10,11 @@
 
 namespace fs = std::filesystem;
 
+static std::string machine_root(const std::string &machine_name)
+{
+    return "devices/" + machine_name;
+}
+
 static std::vector<std::string> split_csv(const std::string &line)
 {
     std::vector<std::string> values;
@@ -50,7 +55,7 @@ static bool is_pid_only(const std::string &value)
 
 void handle_tasklist(const std::string &machine_name)
 {
-    std::ifstream file(machine_name + "/C/Windows/System32/tasklist.txt");
+    std::ifstream file(machine_root(machine_name) + "/C/Windows/System32/tasklist.txt");
     if (!file.is_open())
     {
         std::cout << "ERROR: Unable to retrieve process information.\n";
@@ -117,7 +122,7 @@ void handle_taskkill(const std::string &machine_name, const std::string &input)
         command = command.substr(9);
     }
 
-    std::string path = machine_name + "/C/Windows/System32/tasklist.txt";
+    std::string path = machine_root(machine_name) + "/C/Windows/System32/tasklist.txt";
     if (!fs::exists(path))
     {
         std::cout << "ERROR: The process " << target << " could not be terminated.\n";

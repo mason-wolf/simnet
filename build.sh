@@ -1,1 +1,1 @@
-g++ -std=c++20 *.cpp fs/*.cpp registry/*.cpp network/*.cpp process/*.cpp events/*.cpp -o app
+g++ -std=c++20 *.cpp fs/*.cpp registry/*.cpp network/*.cpp process/*.cpp events/*.cpp tasks/*.cpp -o app

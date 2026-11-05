@@ -9,9 +9,14 @@
 
 namespace fs = std::filesystem;
 
+static std::string machine_root(const std::string &machine_name)
+{
+    return "devices/" + machine_name;
+}
+
 void handle_ipconfig(const std::string &machine_name)
 {
-    std::ifstream file(machine_name + "/ipconfig.txt");
+    std::ifstream file(machine_root(machine_name) + "/ipconfig.txt");
 
     if (!file.is_open())
     {
@@ -30,7 +35,7 @@ void handle_ipconfig(const std::string &machine_name)
 
 void handle_getmac(const std::string &machine_name)
 {
-    std::ifstream file(machine_name + "/mac.txt");
+    std::ifstream file(machine_root(machine_name) + "/mac.txt");
     if (!file.is_open())
     {
         std::cout << "ERROR: Unable to retrieve MAC address.\n";
@@ -53,7 +58,7 @@ void handle_getmac(const std::string &machine_name)
 
 void handle_whoami(const std::string &machine_name)
 {
-    std::ifstream file(machine_name + "/ssh");
+    std::ifstream file(machine_root(machine_name) + "/ssh");
 
     if (!file.is_open())
     {
@@ -75,7 +80,7 @@ void handle_whoami(const std::string &machine_name)
 
 void handle_netstat(const std::string &machine_name, bool show_pid)
 {
-    std::ifstream file(machine_name + "/netstat.txt");
+    std::ifstream file(machine_root(machine_name) + "/netstat.txt");
     if (!file.is_open())
     {
         std::cout << "ERROR: Unable to retrieve network statistics.\n";
@@ -105,7 +110,6 @@ void handle_netstat(const std::string &machine_name, bool show_pid)
         }
         else
         {
-            // Drop the trailing PID column (last token)
             size_t pos = line.find_last_of(" \t");
             if (pos != std::string::npos)
                 line = line.substr(0, pos);
@@ -119,7 +123,7 @@ void handle_netstat(const std::string &machine_name, bool show_pid)
 
 void handle_net_user(const std::string &machine_name)
 {
-    std::ifstream file(machine_name + "/users");
+    std::ifstream file(machine_root(machine_name) + "/users");
     if (!file.is_open())
     {
         std::cout << "The command failed to complete successfully.\n";
@@ -166,7 +170,7 @@ void handle_arp(const std::string &machine_name, bool show_table)
         return;
     }
 
-    std::ifstream file(machine_name + "/arp.txt");
+    std::ifstream file(machine_root(machine_name) + "/arp.txt");
     if (!file.is_open())
     {
         std::cout << "ERROR: Unable to retrieve ARP table.\n";
@@ -191,7 +195,7 @@ void handle_arp(const std::string &machine_name, bool show_table)
 
 void handle_get_cim_useraccount(const std::string &machine_name)
 {
-    std::ifstream file(machine_name + "/users");
+    std::ifstream file(machine_root(machine_name) + "/users");
     if (!file.is_open())
     {
         std::cout << "ERROR: Unable to retrieve user accounts.\n";
@@ -232,7 +236,7 @@ void handle_get_cim_useraccount(const std::string &machine_name)
 
 void handle_query_user(const std::string &machine_name)
 {
-    std::ifstream file(machine_name + "/sessions");
+    std::ifstream file(machine_root(machine_name) + "/sessions");
     if (!file.is_open())
     {
         std::cout << "ERROR: Unable to retrieve session information.\n";

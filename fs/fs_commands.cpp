@@ -1,13 +1,20 @@
 #include "fs_commands.h"
+#include <chrono>
+#include <ctime>
 #include <iostream>
 #include <fstream>
 #include <filesystem>
 
 namespace fs = std::filesystem;
 
+static std::string machine_root(const std::string &machine_name)
+{
+    return "devices/" + machine_name;
+}
+
 void handle_list_directory(const std::string &machine_name, const std::string &current_dir)
 {
-    std::string real_path = machine_name + "/C";
+    std::string real_path = machine_root(machine_name) + "/C";
 
     std::string win_path = current_dir;
     if (win_path.size() >= 2 && win_path[1] == ':')
@@ -89,14 +96,12 @@ bool handle_change_directory(const std::string &machine_name, std::string &curre
         return true;
     }
 
-    // Build new path
     std::string new_dir = current_dir;
     if (new_dir.back() != '\\') new_dir += "\\";
     new_dir += target;
     if (new_dir.back() != '\\') new_dir += "\\";
 
-    // Convert to real filesystem path for validation
-    std::string real_path = machine_name + "/C";
+    std::string real_path = machine_root(machine_name) + "/C";
     std::string win_path = new_dir;
     if (win_path.size() >= 2 && win_path[1] == ':')
         win_path = win_path.substr(2);
@@ -136,7 +141,7 @@ void handle_make_directory(const std::string &machine_name, const std::string &c
         return;
     }
 
-    std::string real_path = machine_name + "/C";
+    std::string real_path = machine_root(machine_name) + "/C";
     std::string win_path = current_dir;
     if (win_path.size() >= 2 && win_path[1] == ':')
         win_path = win_path.substr(2);
@@ -149,7 +154,6 @@ void handle_make_directory(const std::string &machine_name, const std::string &c
     {
         if (fs::create_directories(real_path))
         {
-            // Windows mkdir is silent on success
         }
         else
         {
@@ -183,7 +187,6 @@ void handle_echo(const std::string &machine_name, const std::string &current_dir
     std::string text = args.substr(0, redirect_pos);
     std::string filename = args.substr(redirect_pos + (append ? 3 : 2));
 
-    // Trim filename
     size_t start = filename.find_first_not_of(" \t");
     if (start != std::string::npos)
         filename = filename.substr(start);
@@ -194,7 +197,7 @@ void handle_echo(const std::string &machine_name, const std::string &current_dir
         return;
     }
 
-    std::string real_path = machine_name + "/C";
+    std::string real_path = machine_root(machine_name) + "/C";
 
     std::string win_path = current_dir;
     if (win_path.size() >= 2 && win_path[1] == ':')
@@ -240,7 +243,7 @@ void handle_type(const std::string &machine_name, const std::string &current_dir
         return;
     }
 
-    std::string real_path = machine_name + "/C";
+    std::string real_path = machine_root(machine_name) + "/C";
     std::string win_path = current_dir;
     if (win_path.size() >= 2 && win_path[1] == ':')
         win_path = win_path.substr(2);
@@ -260,8 +263,9 @@ void handle_type(const std::string &machine_name, const std::string &current_dir
 
         std::string line;
         while (std::getline(file, line))
+        {
             std::cout << line << "\n";
-
+        }
         file.close();
     }
     catch (...)

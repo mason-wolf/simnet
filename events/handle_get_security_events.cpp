@@ -11,7 +11,6 @@
 
 namespace fs = std::filesystem;
 
-namespace {
 struct EventRecord {
     std::string time_created;
     int id = 0;
@@ -106,7 +105,7 @@ std::string current_windows_time_string()
 
 std::string security_log_path(const std::string &machine_name)
 {
-    return machine_name + "/security_events.txt";
+    return "devices/" + machine_name + "/security_events.txt";
 }
 
 std::vector<std::string> split_event_blocks(const std::string &content)
@@ -253,8 +252,6 @@ std::vector<LoggedSecurityEvent> read_security_log_events(const std::string &mac
     }
     return fallback;
 }
-
-} // namespace
 
 void log_command_security_event(const std::string &machine_name, const std::string &process_name, const std::string &command_line)
 {
