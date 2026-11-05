@@ -184,7 +184,13 @@ void SimAgent::login(const std::string &machine_name)
 
         if (input == "schtasks")
         {
-            handle_schtasks(machine_name);
+            handle_schtasks(machine_name, input);
+            continue;
+        }
+
+        if (input.find("schtasks") == 0)
+        {
+            handle_schtasks(machine_name, input);
             continue;
         }
 
