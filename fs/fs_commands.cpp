@@ -4,11 +4,23 @@
 #include <ctime>
 #include <filesystem>
 #include <fstream>
+#include <functional>
 #include <iostream>
 #include <string>
 #include <vector>
 
 namespace fs = std::filesystem;
+
+static std::string trim(const std::string &value)
+{
+    const std::string whitespace = " \t\r\n";
+    const size_t start = value.find_first_not_of(whitespace);
+    if (start == std::string::npos)
+        return "";
+
+    const size_t end = value.find_last_not_of(whitespace);
+    return value.substr(start, end - start + 1);
+}
 
 static std::string machine_root(const std::string &machine_name)
 {
@@ -92,6 +104,47 @@ static std::vector<std::string> parse_windows_tokens(const std::string &input)
         tokens.push_back(current);
 
     return tokens;
+}
+
+static std::string strip_quotes(const std::string &value)
+{
+    std::string result = value;
+    if (result.size() >= 2 && result.front() == '"' && result.back() == '"')
+        result = result.substr(1, result.size() - 2);
+    return result;
+}
+
+static std::vector<std::string> collect_matches_recursive(const fs::path &base, const std::string &filename)
+{
+    std::vector<std::string> matches;
+    std::error_code ec;
+
+    std::function<void(const fs::path &)> walk = [&](const fs::path &path)
+    {
+        if (!fs::exists(path, ec))
+            return;
+
+        for (const auto &entry : fs::directory_iterator(path, ec))
+        {
+            if (ec)
+                break;
+
+            const fs::path current = entry.path();
+            if (fs::is_directory(current, ec))
+            {
+                walk(current);
+                continue;
+            }
+
+            if (current.filename().string() == filename)
+            {
+                matches.push_back(current.string());
+            }
+        }
+    };
+
+    walk(base);
+    return matches;
 }
 
 void handle_move(const std::string &machine_name, const std::string &current_dir, const std::string &input)
@@ -435,5 +488,70 @@ void handle_type(const std::string &machine_name, const std::string &current_dir
     catch (...)
     {
         std::cout << "The system cannot find the file " << filename << ".\n";
+    }
+}
+
+void handle_recursive_file_search(const std::string &machine_name, const std::string &current_dir, const std::string &input)
+{
+    std::string search = input;
+    std::string real_root = machine_root(machine_name) + "/C";
+    std::string win_path = current_dir;
+
+    if (win_path.size() >= 2 && win_path[1] == ':')
+        win_path = win_path.substr(2);
+    for (char &c : win_path)
+        if (c == '\\') c = '/';
+
+    if (!win_path.empty() && win_path.back() != '/')
+        win_path += "/";
+
+    std::string file_filter;
+    if (search.rfind("Get-ChildItem -Recurse -Filter ", 0) == 0)
+    {
+        file_filter = strip_quotes(search.substr(std::string("Get-ChildItem -Recurse -Filter ").size()));
+    }
+    else if (search.rfind("dir /s /b ", 0) == 0)
+    {
+        file_filter = strip_quotes(search.substr(std::string("dir /s /b ").size()));
+    }
+    else if (search.rfind("dir /s /b", 0) == 0)
+    {
+        file_filter = strip_quotes(search.substr(std::string("dir /s /b").size()));
+    }
+    else if (search.rfind("dir /S /B ", 0) == 0)
+    {
+        file_filter = strip_quotes(search.substr(std::string("dir /S /B ").size()));
+    }
+    else if (search.rfind("where /r ", 0) == 0)
+    {
+        size_t last_space = search.find_last_of(' ');
+        if (last_space != std::string::npos)
+            file_filter = strip_quotes(search.substr(last_space + 1));
+    }
+    else
+    {
+        return;
+    }
+
+    file_filter = trim(file_filter);
+    if (file_filter.empty())
+    {
+        std::cout << "The syntax of the command is incorrect.\n";
+        return;
+    }
+
+    std::string base_path = real_root + win_path;
+    std::string query_name = fs::path(file_filter).filename().string();
+    std::vector<std::string> matches = collect_matches_recursive(base_path, query_name);
+
+    if (matches.empty())
+    {
+        std::cout << "File Not Found\n";
+        return;
+    }
+
+    for (const auto &match : matches)
+    {
+        std::cout << match << "\n";
     }
 }

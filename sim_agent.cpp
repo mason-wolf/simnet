@@ -217,6 +217,16 @@ void SimAgent::login(const std::string &machine_name)
             continue;
         }
 
+        if (input.find("Get-ChildItem -Recurse -Filter ") == 0 ||
+            input.find("dir /s /b ") == 0 ||
+            input.find("dir /s /b") == 0 ||
+            input.find("dir /S /B ") == 0 ||
+            input.find("where /r ") == 0)
+        {
+            handle_recursive_file_search(machine_name, current_dir, input);
+            continue;
+        }
+
         if (input.substr(0, 4) == "reg ")
         {
             std::string args = input.substr(4);
