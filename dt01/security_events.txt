@@ -1,0 +1,133 @@
+TimeCreated       : 11/4/2026 2:18:45 PM
+ProviderName      : Microsoft-Windows-Security-Auditing
+Id                : 4624
+LevelDisplayName  : Information
+Message           : An account was successfully logged on.
+
+                      Creator Subject:
+                        Security ID:            S-1-5-18
+                        Account Name:           DT01$
+                        Account Domain:         WORKGROUP
+                        Logon ID:               0x3E7
+
+                      Target Subject:
+                        Security ID:            S-1-0-0
+                        Account Name:           -
+                        Account Domain:         -
+                        Logon ID:               0x0
+
+                      Process Information:
+                        New Process ID:         0x1a4c
+                        New Process Name:       C:\Windows\System32\winlogon.exe
+                        Token Elevation Type:   %%1936
+                        Mandatory Label:        S-1-16-16384
+                        Creator Process ID:     0x2f8
+                        Creator Process Name:   C:\Windows\System32\services.exe
+                        Process Command Line:   C:\Windows\System32\winlogon.exe
+
+Keywords          : {Audit Success}
+Task              : 13312
+Opcode            : Info
+RecordId          : 1839
+---
+TimeCreated       : 11/4/2026 2:17:58 PM
+ProviderName      : Microsoft-Windows-Security-Auditing
+Id                : 4672
+LevelDisplayName  : Information
+Message           : Special privileges assigned to new logon.
+
+                      Creator Subject:
+                        Security ID:            S-1-5-18
+                        Account Name:           DT01$
+                        Account Domain:         WORKGROUP
+                        Logon ID:               0x3E7
+
+                      Target Subject:
+                        Security ID:            S-1-5-21-1234567890-1234567890-1234567890-1001
+                        Account Name:           Administrator
+                        Account Domain:         DT01
+                        Logon ID:               0x3E7
+
+Keywords          : {Audit Success}
+Task              : 13312
+Opcode            : Info
+RecordId          : 1840
+---
+TimeCreated       : 11/4/2026 6:04:03 PM
+ProviderName      : Microsoft-Windows-Security-Auditing
+Id                : 4688
+LevelDisplayName  : Information
+Message           : A new process has been created.
+
+                      Creator Subject:
+                        Security ID:            S-1-5-18
+                        Account Name:           DT01$
+                        Account Domain:         WORKGROUP
+                        Logon ID:               0x3E7
+
+                      Target Subject:
+                        Security ID:            S-1-0-0
+                        Account Name:           -
+                        Account Domain:         -
+                        Logon ID:               0x0
+
+                      Process Information:
+                        New Process ID:         0x1a4c
+                        New Process Name:       C:\Windows\System32\netstat.exe
+                        Token Elevation Type:   %%1936
+                        Mandatory Label:        S-1-16-16384
+                        Creator Process ID:     0x2f8
+                        Creator Process Name:   C:\Windows\System32\cmd.exe
+                        Process Command Line:   netstat
+
+                      Token Elevation Type indicates the type of token that was assigned to the new process in accordance with User Account Control policy.
+
+                      Type 1 is a full token with no privileges removed or groups disabled.  A full token is only used if User Account Control is disabled or if the user is the built-in Administrator account or a service account.
+
+                      Type 2 is an elevated token with no privileges removed or groups disabled.  An elevated token is used when User Account Control is enabled and the user chooses to start the program using Run as administrator.  An elevated token is also used when an application is configured to always require administrative privilege or to always require maximum privilege, and the user is a member of the Administrators group.
+
+                      Type 3 is a limited token with administrative privileges removed and administrative groups disabled.  The limited token is used when User Account Control is enabled, the application does not require administrative privilege, and the user does not choose to start the program using Run as administrator.
+Keywords          : {Audit Success}
+Task              : 13312
+Opcode            : Info
+RecordId          : 1842
+---
+TimeCreated       : 11/4/2026 6:04:15 PM
+ProviderName      : Microsoft-Windows-Security-Auditing
+Id                : 4688
+LevelDisplayName  : Information
+Message           : A new process has been created.
+
+                      Creator Subject:
+                        Security ID:            S-1-5-18
+                        Account Name:           DT01$
+                        Account Domain:         WORKGROUP
+                        Logon ID:               0x3E7
+
+                      Target Subject:
+                        Security ID:            S-1-0-0
+                        Account Name:           -
+                        Account Domain:         -
+                        Logon ID:               0x0
+
+                      Process Information:
+                        New Process ID:         0x1a4c
+                        New Process Name:       C:\Windows\System32\ipconfig.exe
+                        Token Elevation Type:   %%1936
+                        Mandatory Label:        S-1-16-16384
+                        Creator Process ID:     0x2f8
+                        Creator Process Name:   C:\Windows\System32\cmd.exe
+                        Process Command Line:   ipconfig
+
+                      Token Elevation Type indicates the type of token that was assigned to the new process in accordance with User Account Control policy.
+
+                      Type 1 is a full token with no privileges removed or groups disabled.  A full token is only used if User Account Control is disabled or if the user is the built-in Administrator account or a service account.
+
+                      Type 2 is an elevated token with no privileges removed or groups disabled.  An elevated token is used when User Account Control is enabled and the user chooses to start the program using Run as administrator.  An elevated token is also used when an application is configured to always require administrative privilege or to always require maximum privilege, and the user is a member of the Administrators group.
+
+                      Type 3 is a limited token with administrative privileges removed and administrative groups disabled.  The limited token is used when User Account Control is enabled, the application does not require administrative privilege, and the user does not choose to start the program using Run as administrator.
+Keywords          : {Audit Success}
+Task              : 13312
+Opcode            : Info
+RecordId          : 1842
+---

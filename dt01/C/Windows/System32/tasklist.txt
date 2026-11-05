@@ -20,6 +20,7 @@ svchost.exe,1412,Services,0,11,204 K
 SearchIndexer.exe,2148,Services,0,34,812 K
 SecurityHealthService,2210,Services,0,10,214 K
 userinit.exe,2468,Console,1,4,912 K
+explorer.exe,2496,Console,1,98,124 K
 smartscreen.exe,3104,Console,1,14,104 K
 taskhostw.exe,3120,Console,1,12,408 K
 OneDrive.exe,3892,Console,1,28,416 K

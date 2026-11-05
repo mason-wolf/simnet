@@ -284,6 +284,66 @@ void scaffold_processes(const std::string &machine_name) {
 
     }
 
+void scaffold_security_events(const std::string &machine_name)
+{
+    std::ofstream file(machine_name + "/security_events.txt");
+    if (!file.is_open())
+    {
+        return;
+    }
+
+    file << "TimeCreated       : 11/4/2026 2:18:45 PM\n";
+    file << "ProviderName      : Microsoft-Windows-Security-Auditing\n";
+    file << "Id                : 4624\n";
+    file << "LevelDisplayName  : Information\n";
+    file << "Message           : An account was successfully logged on.\n\n";
+    file << "                      Creator Subject:\n";
+    file << "                        Security ID:            S-1-5-18\n";
+    file << "                        Account Name:           DT01$\n";
+    file << "                        Account Domain:         WORKGROUP\n";
+    file << "                        Logon ID:               0x3E7\n\n";
+    file << "                      Target Subject:\n";
+    file << "                        Security ID:            S-1-0-0\n";
+    file << "                        Account Name:           -\n";
+    file << "                        Account Domain:         -\n";
+    file << "                        Logon ID:               0x0\n\n";
+    file << "                      Process Information:\n";
+    file << "                        New Process ID:         0x1a4c\n";
+    file << "                        New Process Name:       C:\\Windows\\System32\\winlogon.exe\n";
+    file << "                        Token Elevation Type:   %%1936\n";
+    file << "                        Mandatory Label:        S-1-16-16384\n";
+    file << "                        Creator Process ID:     0x2f8\n";
+    file << "                        Creator Process Name:   C:\\Windows\\System32\\services.exe\n";
+    file << "                        Process Command Line:   C:\\Windows\\System32\\winlogon.exe\n\n";
+    file << "Keywords          : {Audit Success}\n";
+    file << "Task              : 13312\n";
+    file << "Opcode            : Info\n";
+    file << "RecordId          : 1839\n";
+    file << "---\n";
+
+    file << "TimeCreated       : 11/4/2026 2:17:58 PM\n";
+    file << "ProviderName      : Microsoft-Windows-Security-Auditing\n";
+    file << "Id                : 4672\n";
+    file << "LevelDisplayName  : Information\n";
+    file << "Message           : Special privileges assigned to new logon.\n\n";
+    file << "                      Creator Subject:\n";
+    file << "                        Security ID:            S-1-5-18\n";
+    file << "                        Account Name:           DT01$\n";
+    file << "                        Account Domain:         WORKGROUP\n";
+    file << "                        Logon ID:               0x3E7\n\n";
+    file << "                      Target Subject:\n";
+    file << "                        Security ID:            S-1-5-21-1234567890-1234567890-1234567890-1001\n";
+    file << "                        Account Name:           Administrator\n";
+    file << "                        Account Domain:         DT01\n";
+    file << "                        Logon ID:               0x3E7\n\n";
+    file << "Keywords          : {Audit Success}\n";
+    file << "Task              : 13312\n";
+    file << "Opcode            : Info\n";
+    file << "RecordId          : 1840\n";
+    file << "---\n";
+
+    file.close();
+}
 
 /**
  * Adds a machine.
@@ -305,6 +365,7 @@ void handle_add_machine(const std::string &input)
             scaffold_users(machine_name);
             scaffold_arp(machine_name);
             scaffold_sessions(machine_name);
+            scaffold_security_events(machine_name);
             scaffold_processes(machine_name);
         }
         else
