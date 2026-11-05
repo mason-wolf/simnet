@@ -4,8 +4,135 @@
 #include "sim_agent.h"
 #include <fstream>
 #include "tasks/tasks_commands.h"
+#include <vector>
+#include <termios.h>
+#include <unistd.h>
 
 namespace fs = std::filesystem;
+
+static void render_command_line(const std::string &prompt, const std::string &line, size_t previous_size)
+{
+    std::cout << "\r" << prompt << line;
+    if (previous_size > line.size())
+    {
+        std::cout << std::string(previous_size - line.size(), ' ');
+    }
+    std::cout << "\r" << prompt << line << std::flush;
+}
+
+static std::string read_command_with_history(const std::string &prompt, std::vector<std::string> &history)
+{
+    struct termios original;
+    if (tcgetattr(STDIN_FILENO, &original) != 0)
+    {
+        std::string result;
+        std::getline(std::cin, result);
+        if (!result.empty() && (history.empty() || history.back() != result))
+        {
+            history.push_back(result);
+        }
+        return result;
+    }
+
+    struct termios raw = original;
+    raw.c_lflag &= ~(ICANON | ECHO);
+    tcsetattr(STDIN_FILENO, TCSANOW, &raw);
+
+    std::string current;
+    std::string draft;
+    size_t history_cursor = history.size();
+    size_t previous_size = 0;
+
+    std::cout << prompt << std::flush;
+
+    while (true)
+    {
+        char ch = 0;
+        if (read(STDIN_FILENO, &ch, 1) <= 0)
+        {
+            continue;
+        }
+
+        if (ch == '\n' || ch == '\r')
+        {
+            std::cout << "\n";
+            break;
+        }
+
+        if (ch == 0x1b)
+        {
+            char seq1 = 0;
+            char seq2 = 0;
+            if (read(STDIN_FILENO, &seq1, 1) <= 0)
+            {
+                continue;
+            }
+            if (read(STDIN_FILENO, &seq2, 1) <= 0)
+            {
+                continue;
+            }
+
+            if (seq1 == '[')
+            {
+                switch (seq2)
+                {
+                    case 'A':
+                        if (history_cursor > 0)
+                        {
+                            if (history_cursor == history.size())
+                            {
+                                draft = current;
+                            }
+                            --history_cursor;
+                            current = history[history_cursor];
+                            render_command_line(prompt, current, previous_size);
+                            previous_size = current.size();
+                        }
+                        break;
+                    case 'B':
+                        if (history_cursor < history.size())
+                        {
+                            ++history_cursor;
+                            current = (history_cursor == history.size()) ? draft : history[history_cursor];
+                            render_command_line(prompt, current, previous_size);
+                            previous_size = current.size();
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+            continue;
+        }
+
+        if (ch == 127 || ch == 8)
+        {
+            if (!current.empty())
+            {
+                current.pop_back();
+            }
+            render_command_line(prompt, current, previous_size);
+            previous_size = current.size();
+            continue;
+        }
+
+        if (ch >= 32)
+        {
+            current.push_back(ch);
+            std::cout << ch << std::flush;
+            previous_size = current.size();
+        }
+    }
+
+    tcsetattr(STDIN_FILENO, TCSANOW, &original);
+
+    if (!current.empty() && (history.empty() || history.back() != current))
+    {
+        history.push_back(current);
+    }
+
+    return current;
+}
 
 static std::string machine_root(const std::string &machine_name)
 {
@@ -491,11 +618,11 @@ void handle_login(const std::string &input)
 void MachineManager::run()
 {
     std::string input;
+    std::vector<std::string> history;
 
     while (true)
     {
-        std::cout << "> ";
-        std::getline(std::cin, input);
+        input = read_command_with_history("> ", history);
 
         if (handle_exit(input))
         {

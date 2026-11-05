@@ -56,6 +56,11 @@ void handle_getmac(const std::string &machine_name)
     std::cout << "\n";
 }
 
+void handle_hostname(const std::string &machine_name)
+{
+    std::cout << machine_name << "\n";
+}
+
 void handle_whoami(const std::string &machine_name)
 {
     std::ifstream file(machine_root(machine_name) + "/ssh");

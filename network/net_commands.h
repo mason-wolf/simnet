@@ -3,6 +3,7 @@
 
 void handle_ipconfig(const std::string &machine_name);
 void handle_getmac(const std::string &machine_name);
+void handle_hostname(const std::string &machine_name);
 void handle_whoami(const std::string &machine_name);
 void handle_netstat(const std::string &machine_name, bool show_id);
 void handle_net_user(const std::string &machine_name);

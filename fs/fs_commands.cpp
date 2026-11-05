@@ -1,15 +1,181 @@
 #include "fs_commands.h"
 #include <chrono>
+#include <cctype>
 #include <ctime>
-#include <iostream>
-#include <fstream>
 #include <filesystem>
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <vector>
 
 namespace fs = std::filesystem;
 
 static std::string machine_root(const std::string &machine_name)
 {
     return "devices/" + machine_name;
+}
+
+static std::string normalize_windows_path(const std::string &value)
+{
+    std::string out = value;
+    for (char &ch : out)
+    {
+        if (ch == '\\') ch = '/';
+    }
+    return out;
+}
+
+static std::string resolve_windows_path(const std::string &machine_name, const std::string &current_dir, const std::string &path)
+{
+    std::string root = machine_root(machine_name) + "/C";
+    std::string current = current_dir;
+
+    if (current.size() >= 2 && current[1] == ':')
+        current = current.substr(2);
+    current = normalize_windows_path(current);
+
+    if (!current.empty() && current.back() != '/')
+        current += "/";
+
+    std::string candidate = path;
+    if (candidate.size() >= 2 && candidate[1] == ':')
+    {
+        candidate = candidate.substr(2);
+    }
+    candidate = normalize_windows_path(candidate);
+    if (!candidate.empty() && candidate[0] == '/')
+    {
+        candidate = candidate.substr(1);
+    }
+
+    if (candidate.empty())
+    {
+        return root + current;
+    }
+
+    if (candidate[0] == '.')
+    {
+        return root + current + candidate.substr(1);
+    }
+
+    return root + current + candidate;
+}
+
+static std::vector<std::string> parse_windows_tokens(const std::string &input)
+{
+    std::vector<std::string> tokens;
+    std::string current;
+    bool in_quotes = false;
+
+    for (char ch : input)
+    {
+        if (ch == '"')
+        {
+            in_quotes = !in_quotes;
+            continue;
+        }
+
+        if (std::isspace(static_cast<unsigned char>(ch)) && !in_quotes)
+        {
+            if (!current.empty())
+            {
+                tokens.push_back(current);
+                current.clear();
+            }
+            continue;
+        }
+
+        current.push_back(ch);
+    }
+
+    if (!current.empty())
+        tokens.push_back(current);
+
+    return tokens;
+}
+
+void handle_move(const std::string &machine_name, const std::string &current_dir, const std::string &input)
+{
+    if (input.substr(0, 4) != "move")
+        return;
+
+    std::string args = input.substr(4);
+    std::vector<std::string> tokens = parse_windows_tokens(args);
+    if (tokens.size() != 2)
+    {
+        std::cout << "The syntax of the command is incorrect.\n";
+        return;
+    }
+
+    std::string source = tokens[0];
+    std::string destination = tokens[1];
+    std::string from_path = resolve_windows_path(machine_name, current_dir, source);
+    std::string to_path = resolve_windows_path(machine_name, current_dir, destination);
+
+    if (!fs::exists(from_path))
+    {
+        std::cout << "The system cannot find the file specified.\n";
+        return;
+    }
+
+    std::error_code ec;
+    fs::path target_path(to_path);
+    if (fs::exists(target_path) && fs::is_directory(target_path))
+    {
+        std::string leaf = fs::path(from_path).filename().string();
+        to_path = (target_path / leaf).string();
+    }
+
+    fs::path parent = fs::path(to_path).parent_path();
+    if (!parent.empty() && !fs::exists(parent))
+    {
+        std::cout << "The system cannot find the path specified.\n";
+        return;
+    }
+
+    fs::rename(from_path, to_path, ec);
+    if (ec)
+    {
+        std::cout << "The system cannot find the path specified.\n";
+    }
+}
+
+void handle_rename(const std::string &machine_name, const std::string &current_dir, const std::string &input)
+{
+    if (input.substr(0, 6) != "rename" && input.substr(0, 3) != "ren")
+        return;
+
+    std::string args = input.substr(input.substr(0, 3) == "ren" ? 3 : 6);
+    std::vector<std::string> tokens = parse_windows_tokens(args);
+    if (tokens.size() != 2)
+    {
+        std::cout << "The syntax of the command is incorrect.\n";
+        return;
+    }
+
+    std::string source = tokens[0];
+    std::string destination = tokens[1];
+    std::string from_path = resolve_windows_path(machine_name, current_dir, source);
+    std::string to_path = resolve_windows_path(machine_name, current_dir, destination);
+
+    if (!fs::exists(from_path))
+    {
+        std::cout << "The system cannot find the file specified.\n";
+        return;
+    }
+
+    if (fs::exists(to_path))
+    {
+        std::cout << "A duplicate file name exists, or the file cannot be found.\n";
+        return;
+    }
+
+    std::error_code ec;
+    fs::rename(from_path, to_path, ec);
+    if (ec)
+    {
+        std::cout << "The system cannot find the path specified.\n";
+    }
 }
 
 void handle_list_directory(const std::string &machine_name, const std::string &current_dir)
