@@ -199,12 +199,10 @@ void handle_list_directory(const std::string &machine_name, const std::string &c
         for (const auto &entry : fs::directory_iterator(real_path))
         {
             has_entries = true;
-            auto last_write = fs::last_write_time(entry);
-            std::time_t cftime = std::chrono::system_clock::to_time_t(
-                std::chrono::file_clock::to_sys(last_write));
-
+            std::time_t now = std::time(nullptr);
+            std::tm *local = std::localtime(&now);
             char time_buf[20];
-            std::strftime(time_buf, sizeof(time_buf), "%m/%d/%Y  %I:%M %p", std::localtime(&cftime));
+            std::strftime(time_buf, sizeof(time_buf), "%m/%d/%Y  %I:%M %p", local);
 
             std::string name = entry.path().filename().string();
 

@@ -5,6 +5,7 @@
 #include "process/process_commands.h"
 #include "events/handle_get_security_events.h"
 #include "tasks/tasks_commands.h"
+#include <cctype>
 #include <iostream>
 #include <string>
 #include <filesystem>
@@ -396,6 +397,79 @@ void SimAgent::login(const std::string &machine_name)
                 handle_get_security_event_filter_by_id(machine_name, 4688, max_events, select_last_one);
             }
             catch (...) {}
+            continue;
+        }
+
+        if (input.find("Get-WinEvent -FilterHashtable @{LogName='Security';") == 0 ||
+            input.find("Get-WinEvent -FilterHashtable @{LogName=\"Security\";") == 0)
+        {
+            size_t id_pos = input.find("Id");
+            if (id_pos != std::string::npos)
+            {
+                size_t eq_pos = input.find('=', id_pos);
+                if (eq_pos != std::string::npos)
+                {
+                    size_t val_start = eq_pos + 1;
+                    while (val_start < input.size() && (std::isspace(static_cast<unsigned char>(input[val_start])) || input[val_start] == ';'))
+                    {
+                        ++val_start;
+                    }
+
+                    size_t val_end = val_start;
+                    while (val_end < input.size() && std::isdigit(static_cast<unsigned char>(input[val_end])))
+                    {
+                        ++val_end;
+                    }
+
+                    if (val_end > val_start)
+                    {
+                        try
+                        {
+                            int event_id = std::stoi(input.substr(val_start, val_end - val_start));
+                            size_t max_pos = input.find(" -MaxEvents ");
+                            if (max_pos != std::string::npos)
+                            {
+                                size_t max_start = max_pos + std::string(" -MaxEvents ").size();
+                                size_t max_end = input.find(" ", max_start);
+                                if (max_end == std::string::npos)
+                                    max_end = input.size();
+
+                                if (max_start < input.size())
+                                {
+                                    int max_events = std::stoi(input.substr(max_start, max_end - max_start));
+                                    bool select_last_one = (input.find("Select-Object -Last 1") != std::string::npos);
+                                    handle_get_security_event_filter_by_id(machine_name, event_id, max_events, select_last_one);
+                                    continue;
+                                }
+                            }
+                        }
+                        catch (...) {}
+                    }
+                }
+            }
+        }
+
+        if (input.find("sc create") == 0)
+        {
+            handle_sc_create(machine_name, input);
+            continue;
+        }
+
+        if (input == "sc query")
+        {
+            handle_sc_query(machine_name);
+            continue;
+        }
+
+        if (input == "Get-Service")
+        {
+            handle_get_service(machine_name);
+            continue;
+        }
+
+        if (input == "net start")
+        {
+            handle_net_start(machine_name);
             continue;
         }
     }

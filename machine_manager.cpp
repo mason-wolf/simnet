@@ -139,6 +139,8 @@ static std::string machine_root(const std::string &machine_name)
     return "devices/" + machine_name;
 }
 
+void scaffold_services(const std::string &machine_name);
+
 /**
  * Handles exit command.
  */
@@ -500,6 +502,7 @@ void handle_add_machine(const std::string &input)
             scaffold_security_events(machine_name);
             scaffold_processes(machine_name);
             scaffold_tasks(machine_name);
+            scaffold_services(machine_name);
         }
         else
         {
@@ -638,4 +641,95 @@ void MachineManager::run()
         handle_remove_machine(input);
         handle_login(input);
     }
+}
+
+void scaffold_services(const std::string &machine_name)
+{
+    const std::string root = machine_root(machine_name);
+    fs::create_directories(root + "/services");
+
+    std::ofstream file(root + "/services/sc_query.txt");
+    if (!file.is_open())
+        return;
+
+    const std::vector<std::string> names = {
+        "Appinfo", "AudioEndpointBuilder", "Audiosrv", "BFE", "BITS", "BrokerInfrastructure",
+        "camsvc", "CDPSvc", "CertPropSvc", "ClipSVC", "CoreMessagingRegistrar", "CryptSvc",
+        "DcomLaunch", "DeviceAssociationService", "Dhcp", "DiagTrack", "Dnscache", "DPS",
+        "EventLog", "EventSystem", "FontCache", "gpsvc", "iphlpsvc", "LanmanServer",
+        "LanmanWorkstation", "LSM", "mpssvc", "NlaSvc", "nsi", "Power", "ProfSvc",
+        "RpcEptMapper", "RpcSs", "Schedule", "SecurityHealthService", "SENS",
+        "ShellHWDetection", "Spooler", "StateRepository", "StorSvc", "SysMain",
+        "SystemEventsBroker", "Themes", "UserManager", "UsoSvc", "Wcmsvc", "WinDefend",
+        "Winmgmt", "WlanSvc", "WSearch", "wuauserv"
+    };
+
+    const std::vector<std::pair<std::string, std::string>> display = {
+        {"Appinfo", "Application Information"},
+        {"AudioEndpointBuilder", "Windows Audio Endpoint Builder"},
+        {"Audiosrv", "Windows Audio"},
+        {"BFE", "Base Filtering Engine"},
+        {"BITS", "Background Intelligent Transfer Service"},
+        {"BrokerInfrastructure", "Background Tasks Infrastructure Service"},
+        {"camsvc", "Capability Access Manager Service"},
+        {"CDPSvc", "Connected Devices Platform Service"},
+        {"CertPropSvc", "Certificate Propagation"},
+        {"ClipSVC", "Client License Service (ClipSVC)"},
+        {"CoreMessagingRegistrar", "CoreMessaging"},
+        {"CryptSvc", "Cryptographic Services"},
+        {"DcomLaunch", "DCOM Server Process Launcher"},
+        {"DeviceAssociationService", "Device Association Service"},
+        {"Dhcp", "DHCP Client"},
+        {"DiagTrack", "Connected User Experiences and Telemetry"},
+        {"Dnscache", "DNS Client"},
+        {"DPS", "Diagnostic Policy Service"},
+        {"EventLog", "Windows Event Log"},
+        {"EventSystem", "COM+ Event System"},
+        {"FontCache", "Windows Font Cache Service"},
+        {"gpsvc", "Group Policy Client"},
+        {"iphlpsvc", "IP Helper"},
+        {"LanmanServer", "Server"},
+        {"LanmanWorkstation", "Workstation"},
+        {"LSM", "Local Session Manager"},
+        {"mpssvc", "Windows Defender Firewall"},
+        {"NlaSvc", "Network Location Awareness"},
+        {"nsi", "Network Store Interface Service"},
+        {"Power", "Power"},
+        {"ProfSvc", "User Profile Service"},
+        {"RpcEptMapper", "RPC Endpoint Mapper"},
+        {"RpcSs", "Remote Procedure Call (RPC)"},
+        {"Schedule", "Task Scheduler"},
+        {"SecurityHealthService", "Windows Security Service"},
+        {"SENS", "System Event Notification Service"},
+        {"ShellHWDetection", "Shell Hardware Detection"},
+        {"Spooler", "Print Spooler"},
+        {"StateRepository", "State Repository Service"},
+        {"StorSvc", "Storage Service"},
+        {"SysMain", "SysMain"},
+        {"SystemEventsBroker", "System Events Broker"},
+        {"Themes", "Themes"},
+        {"UserManager", "User Manager"},
+        {"UsoSvc", "Update Orchestrator Service"},
+        {"Wcmsvc", "Windows Connection Manager"},
+        {"WinDefend", "Microsoft Defender Antivirus Service"},
+        {"Winmgmt", "Windows Management Instrumentation"},
+        {"WlanSvc", "WLAN AutoConfig"},
+        {"WSearch", "Windows Search"},
+        {"wuauserv", "Windows Update"}
+    };
+
+    for (const auto &svc : display)
+    {
+        file << "SERVICE_NAME: " << svc.first << "\n";
+        file << "DISPLAY_NAME: " << svc.second << "\n";
+        file << "        TYPE               : 20  WIN32_SHARE_PROCESS\n";
+        file << "        STATE              : 4  RUNNING\n";
+        file << "                                (STOPPABLE, NOT_PAUSABLE, IGNORES_SHUTDOWN)\n";
+        file << "        WIN32_EXIT_CODE    : 0  (0x0)\n";
+        file << "        SERVICE_EXIT_CODE  : 0  (0x0)\n";
+        file << "        CHECKPOINT         : 0x0\n";
+        file << "        WAIT_HINT          : 0x0\n\n";
+    }
+
+    file.close();
 }
